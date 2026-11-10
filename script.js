@@ -6,31 +6,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const addBtn = document.getElementById('addBtn');
     const toastMessage = document.getElementById('toastMessage');
 
-    // --- 0. 플레이스홀더 동적 업데이트 로직 ---
+    // 파스텔 팔레트 및 과목별 색상 매핑
+    const pastelPalette = [
+        '#E8F0FE', // Soft Blue
+        '#E6F4EA', // Soft Green
+        '#FEF7E0', // Soft Yellow
+        '#FCE8E6', // Soft Pink
+        '#F3E8FD', // Soft Purple
+        '#E0F2F1', // Soft Teal
+        '#FFF2E2', // Soft Peach
+        '#EAEFF5'  // Soft Slate
+    ];
+    const courseColorMap = {};
+
+    function getCourseColor(courseName) {
+        if (!courseColorMap[courseName]) {
+            const index = Object.keys(courseColorMap).length % pastelPalette.length;
+            courseColorMap[courseName] = pastelPalette[index];
+        }
+        return courseColorMap[courseName];
+    }
+
+    // 0. 플레이스홀더 동적 업데이트 로직
     function updatePlaceholder() {
         const separator = separatorSelect.value;
         const currentOrder = [...sortableList.querySelectorAll('.sortable-item')].map(item => item.dataset.type);
         
-        // 항목별 예시 데이터
         const exampleData = {
             name: '생활속의 예술',
             place: 'E0107',
             time: '월 09:00-11:00'
         };
         
-        // 현재 순서에 맞게 예시 데이터 배열 생성 후 구분자로 결합
-        // (쉼표나 슬래시 뒤에는 띄어쓰기를 한 칸 추가하여 가독성을 높임)
         const joinString = separator === ' ' ? ' ' : `${separator} `;
         const placeholderString = currentOrder.map(type => exampleData[type]).join(joinString);
         
         rawInput.placeholder = `강의 정보 붙여넣기 (예: ${placeholderString})`;
     }
 
-    // 초기 로딩 시와 구분자가 바뀔 때 플레이스홀더 업데이트
     updatePlaceholder();
     separatorSelect.addEventListener('change', updatePlaceholder);
 
-    // --- 1. 기본 테이블 생성 로직 (09:00 ~ 17:00) ---
+    // 1. 기본 테이블 생성 로직 (09:00 ~ 17:00)
     for (let time = 9; time <= 17; time++) {
         const tr = document.createElement('tr');
         const thTime = document.createElement('td');
@@ -45,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             td.addEventListener('click', function() {
                 if (this.classList.contains('filled')) {
                     this.innerHTML = '';
+                    this.style.backgroundColor = '';
                     this.classList.remove('filled');
                 }
             });
@@ -53,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.appendChild(tr);
     }
 
-    // --- 2. 드래그 앤 드롭 로직 ---
+    // 2. 드래그 앤 드롭 로직
     let draggedItem = null;
 
     sortableList.addEventListener('dragstart', (e) => {
@@ -67,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('sortable-item')) {
             e.target.classList.remove('dragging');
             draggedItem = null;
-            // 드래그로 순서 변경이 끝난 직후 플레이스홀더 즉시 업데이트
             updatePlaceholder();
         }
     });
@@ -97,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // --- 3. 스마트 파서 및 데이터 매핑 로직 ---
+    // 3. 스마트 파서 및 데이터 매핑 로직
     function showToast(message) {
         toastMessage.textContent = message;
         toastMessage.classList.add('show');
@@ -168,10 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 해당 과목 전용 파스텔 컬러 추출
+        const bgAccent = getCourseColor(courseData.name);
+
         parsedTime.periods.forEach(period => {
             const targetCell = document.querySelector(`td[data-day="${parsedTime.dayIndex}"][data-time="${period}"]`);
             if (targetCell) {
                 targetCell.innerHTML = `${courseData.name}<span class="course-place">${courseData.place}</span>`;
+                targetCell.style.backgroundColor = bgAccent;
                 targetCell.classList.add('filled');
             }
         });
