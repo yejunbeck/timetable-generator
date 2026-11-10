@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시간표 생성기</title>
+    <title>스마트 시간표 생성기</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -11,31 +11,28 @@
     <div class="container">
         <h1>시간표 생성기</h1>
         
-        <div class="input-group">
-            <input type="text" id="courseName" placeholder="강의명 (예: 생활속의 예술)" autocomplete="off">
-            <input type="text" id="coursePlace" placeholder="장소 (예: E0107)" autocomplete="off">
-            <select id="courseDay">
-                <option value="1">월요일</option>
-                <option value="2">화요일</option>
-                <option value="3">수요일</option>
-                <option value="4">목요일</option>
-                <option value="5">금요일</option>
+        <!-- 데이터 포맷 설정 (드래그 앤 드롭) -->
+        <div class="format-builder">
+            <span class="label">데이터 순서 설정</span>
+            <div class="sortable-list" id="sortableList">
+                <div class="sortable-item" draggable="true" data-type="name">강의명</div>
+                <div class="sortable-item" draggable="true" data-type="place">장소</div>
+                <div class="sortable-item" draggable="true" data-type="time">시간</div>
+            </div>
+            <select id="separator" class="separator-select">
+                <option value=",">구분자: 쉼표 (,)</option>
+                <option value="/">구분자: 슬래시 (/)</option>
+                <option value=" ">구분자: 공백 ( )</option>
             </select>
-            <select id="courseTime">
-                <option value="1">1교시</option>
-                <option value="2">2교시</option>
-                <option value="3">3교시</option>
-                <option value="4">4교시</option>
-                <option value="5">5교시</option>
-                <option value="6">6교시</option>
-                <option value="7">7교시</option>
-                <option value="8">8교시</option>
-                <option value="9">9교시</option>
-            </select>
-            <button id="addBtn">추가</button>
         </div>
 
-        <div id="toastMessage" class="toast">강의명과 장소를 모두 입력해 주세요.</div>
+        <!-- 텍스트 붙여넣기 영역 -->
+        <div class="input-group">
+            <input type="text" id="rawInput" placeholder="강의 정보 붙여넣기 (예: 생활속의 예술, E0107, 월 1-2)" autocomplete="off">
+            <button id="addBtn">자동 생성</button>
+        </div>
+
+        <div id="toastMessage" class="toast">입력 정보를 다시 확인해 주세요.</div>
 
         <div class="table-container">
             <table id="timetable">
@@ -50,7 +47,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- JS에서 행 생성 -->
+                    <!-- JS에서 행 자동 생성 -->
                 </tbody>
             </table>
         </div>
