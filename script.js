@@ -6,17 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const addBtn = document.getElementById('addBtn');
     const toastMessage = document.getElementById('toastMessage');
 
-    // --- 1. 기본 테이블 생성 로직 ---
-    for (let i = 1; i <= 9; i++) {
+    // 1. 기본 테이블 생성 로직 (09:00 ~ 17:00 생성, 18:00 종료)
+    for (let time = 9; time <= 17; time++) {
         const tr = document.createElement('tr');
         const thTime = document.createElement('td');
-        thTime.textContent = `${i}교시`;
+        
+        // 9 -> "09:00" 형식으로 포맷팅
+        thTime.textContent = `${String(time).padStart(2, '0')}:00`;
         tr.appendChild(thTime);
 
-        for (let j = 1; j <= 5; j++) {
+        for (let day = 1; day <= 5; day++) {
             const td = document.createElement('td');
-            td.dataset.day = j;
-            td.dataset.time = i;
+            td.dataset.day = day;
+            td.dataset.time = time; // 9, 10, 11 등 시간 정수값 할당
+            
             td.addEventListener('click', function() {
                 if (this.classList.contains('filled')) {
                     this.innerHTML = '';
@@ -28,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.appendChild(tr);
     }
 
-    // --- 2. 드래그 앤 드롭 로직 ---
+    // 2. 드래그 앤 드롭 로직
     let draggedItem = null;
 
     sortableList.addEventListener('dragstart', (e) => {
@@ -70,14 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // --- 3. 스마트 파서 및 데이터 매핑 로직 ---
+    // 3. 스마트 파서 및 데이터 매핑 로직
     function showToast(message) {
         toastMessage.textContent = message;
         toastMessage.classList.add('show');
         setTimeout(() => toastMessage.classList.remove('show'), 2500);
     }
 
-    // 시간 문자열(예: "월 1-2", "화 9:00-11:00")을 요일 인덱스와 교시 배열로 변환
+    // 시간 문자열을 분석하여 요일과 할당될 시간대 배열 반환
     function parseTimeData(timeStr) {
         const dayMap = { '월': 1, '화': 2, '수': 3, '목': 4, '금': 5 };
         const dayMatch = timeStr.match(/[월화수목금]/);
@@ -87,22 +90,34 @@ document.addEventListener('DOMContentLoaded', () => {
         let periods = [];
 
         if (timeStr.includes(':')) {
-            // "9:00-11:00" 형태 파싱 (9시를 1교시로 환산)
+            // "9:00~11:00" 형태 파싱 (시작 시간부터 종료 시간 전까지 채움)
             const hours = [...timeStr.matchAll(/(\d{1,2}):/g)].map(m => parseInt(m[1]));
             if (hours.length >= 2) {
-                let start = hours[0] >= 9 ? hours[0] - 8 : hours[0];
-                let end = hours[hours.length - 1] >= 9 ? hours[hours.length - 1] - 8 : hours[hours.length - 1];
-                for (let i = start; i < end; i++) periods.push(i);
+                let start = hours[0];
+                let end = hours[hours.length - 1];
+                
+                // 오후 1시 등을 13시로 자동 변환
+                if (start < 9) start += 12;
+                if (end < 9) end += 12;
+
+                for (let i = start; i < end; i++) {
+                    periods.push(i);
+                }
             }
         } else if (timeStr.includes('-') || timeStr.includes('~')) {
-            // "1-3" 형태 파싱
+            // "1~2" 교시 형태 파싱 (1교시를 9시로 계산하여 환산)
             const nums = timeStr.match(/\d+/g).map(Number);
             if (nums.length >= 2) {
-                for (let i = nums[0]; i <= nums[1]; i++) periods.push(i);
+                for (let i = nums[0]; i <= nums[1]; i++) {
+                    periods.push(i + 8);
+                }
             }
         } else {
             // "1, 2" 형태 파싱
-            periods = timeStr.match(/\d+/g).map(Number);
+            const nums = timeStr.match(/\d+/g);
+            if (nums) {
+                periods = nums.map(n => Number(n) + 8);
+            }
         }
 
         return { dayIndex, periods };
@@ -118,12 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const separator = separatorSelect.value;
         const parts = text.split(separator).map(s => s.trim()).filter(s => s !== '');
         
-        // 현재 화면에 배치된 드래그 엘리먼트 순서 가져오기
         const currentOrder = [...sortableList.querySelectorAll('.sortable-item')].map(item => item.dataset.type);
         
         let courseData = { name: '', place: '', timeStr: '' };
         
-        // 사용자가 설정한 순서대로 parts 배열을 매핑
         currentOrder.forEach((type, index) => {
             if (parts[index]) {
                 if (type === 'name') courseData.name = parts[index];
@@ -139,11 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const parsedTime = parseTimeData(courseData.timeStr);
         if (!parsedTime || parsedTime.periods.length === 0) {
-            showToast('시간을 인식할 수 없습니다. (예: 월 1,2 또는 월 9:00-11:00)');
+            showToast('시간을 인식할 수 없습니다. (예: 월 09:00~11:00)');
             return;
         }
 
-        // 파싱된 교시(여러 개일 수 있음)에 각각 데이터 채워넣기
         parsedTime.periods.forEach(period => {
             const targetCell = document.querySelector(`td[data-day="${parsedTime.dayIndex}"][data-time="${period}"]`);
             if (targetCell) {
@@ -157,6 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addBtn.addEventListener('click', addCourseAuto);
     rawInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addCourseAuto();
+        if (e.key === 'Enter') {
+            addCourseAuto();
+        }
     });
 });
