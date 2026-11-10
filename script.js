@@ -6,19 +6,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const addBtn = document.getElementById('addBtn');
     const toastMessage = document.getElementById('toastMessage');
 
-    // 1. 기본 테이블 생성 로직 (09:00 ~ 17:00 생성, 18:00 종료)
+    // --- 0. 플레이스홀더 동적 업데이트 로직 ---
+    function updatePlaceholder() {
+        const separator = separatorSelect.value;
+        const currentOrder = [...sortableList.querySelectorAll('.sortable-item')].map(item => item.dataset.type);
+        
+        // 항목별 예시 데이터
+        const exampleData = {
+            name: '생활속의 예술',
+            place: 'E0107',
+            time: '월 09:00-11:00'
+        };
+        
+        // 현재 순서에 맞게 예시 데이터 배열 생성 후 구분자로 결합
+        // (쉼표나 슬래시 뒤에는 띄어쓰기를 한 칸 추가하여 가독성을 높임)
+        const joinString = separator === ' ' ? ' ' : `${separator} `;
+        const placeholderString = currentOrder.map(type => exampleData[type]).join(joinString);
+        
+        rawInput.placeholder = `강의 정보 붙여넣기 (예: ${placeholderString})`;
+    }
+
+    // 초기 로딩 시와 구분자가 바뀔 때 플레이스홀더 업데이트
+    updatePlaceholder();
+    separatorSelect.addEventListener('change', updatePlaceholder);
+
+    // --- 1. 기본 테이블 생성 로직 (09:00 ~ 17:00) ---
     for (let time = 9; time <= 17; time++) {
         const tr = document.createElement('tr');
         const thTime = document.createElement('td');
-        
-        // 9 -> "09:00" 형식으로 포맷팅
         thTime.textContent = `${String(time).padStart(2, '0')}:00`;
         tr.appendChild(thTime);
 
         for (let day = 1; day <= 5; day++) {
             const td = document.createElement('td');
             td.dataset.day = day;
-            td.dataset.time = time; // 9, 10, 11 등 시간 정수값 할당
+            td.dataset.time = time;
             
             td.addEventListener('click', function() {
                 if (this.classList.contains('filled')) {
@@ -31,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.appendChild(tr);
     }
 
-    // 2. 드래그 앤 드롭 로직
+    // --- 2. 드래그 앤 드롭 로직 ---
     let draggedItem = null;
 
     sortableList.addEventListener('dragstart', (e) => {
@@ -45,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('sortable-item')) {
             e.target.classList.remove('dragging');
             draggedItem = null;
+            // 드래그로 순서 변경이 끝난 직후 플레이스홀더 즉시 업데이트
+            updatePlaceholder();
         }
     });
 
@@ -73,14 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // 3. 스마트 파서 및 데이터 매핑 로직
+    // --- 3. 스마트 파서 및 데이터 매핑 로직 ---
     function showToast(message) {
         toastMessage.textContent = message;
         toastMessage.classList.add('show');
         setTimeout(() => toastMessage.classList.remove('show'), 2500);
     }
 
-    // 시간 문자열을 분석하여 요일과 할당될 시간대 배열 반환
     function parseTimeData(timeStr) {
         const dayMap = { '월': 1, '화': 2, '수': 3, '목': 4, '금': 5 };
         const dayMatch = timeStr.match(/[월화수목금]/);
@@ -90,34 +113,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let periods = [];
 
         if (timeStr.includes(':')) {
-            // "9:00~11:00" 형태 파싱 (시작 시간부터 종료 시간 전까지 채움)
             const hours = [...timeStr.matchAll(/(\d{1,2}):/g)].map(m => parseInt(m[1]));
             if (hours.length >= 2) {
                 let start = hours[0];
                 let end = hours[hours.length - 1];
-                
-                // 오후 1시 등을 13시로 자동 변환
                 if (start < 9) start += 12;
                 if (end < 9) end += 12;
 
-                for (let i = start; i < end; i++) {
-                    periods.push(i);
-                }
+                for (let i = start; i < end; i++) periods.push(i);
             }
         } else if (timeStr.includes('-') || timeStr.includes('~')) {
-            // "1~2" 교시 형태 파싱 (1교시를 9시로 계산하여 환산)
             const nums = timeStr.match(/\d+/g).map(Number);
             if (nums.length >= 2) {
-                for (let i = nums[0]; i <= nums[1]; i++) {
-                    periods.push(i + 8);
-                }
+                for (let i = nums[0]; i <= nums[1]; i++) periods.push(i + 8);
             }
         } else {
-            // "1, 2" 형태 파싱
             const nums = timeStr.match(/\d+/g);
-            if (nums) {
-                periods = nums.map(n => Number(n) + 8);
-            }
+            if (nums) periods = nums.map(n => Number(n) + 8);
         }
 
         return { dayIndex, periods };
@@ -169,8 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addBtn.addEventListener('click', addCourseAuto);
     rawInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addCourseAuto();
-        }
+        if (e.key === 'Enter') addCourseAuto();
     });
 });
