@@ -159,3 +159,20 @@ td.filled:hover { background-color: #ffeaea; }
     z-index: 1000;
 }
 .toast.show { opacity: 1; visibility: visible; }
+
+
+/* 화면 너비가 768px 이하인 모바일/태블릿 환경에만 적용되는 스타일 */
+@media (max-width: 768px) {
+    body {
+        padding: 16px 12px; /* 모바일에서는 바깥 여백을 줄임 */
+    }
+    
+    .container {
+        padding: 24px 20px; /* 컨테이너 내부 여백 축소 */
+    }
+    
+    th, td {
+        font-size: 12px; /* 텍스트 크기 미세 조정 */
+        height: 50px; /* 칸 높이 축소 */
+    }
+}
