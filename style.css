@@ -1,0 +1,145 @@
+body {
+    font-family: 'Inter', 'Neue Haas Grotesk', -apple-system, sans-serif;
+    background-color: #fafafa;
+    color: #333333;
+    margin: 0;
+    padding: 40px 20px;
+    letter-spacing: -0.01em;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    background: #ffffff;
+    padding: 32px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 900px;
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #111111;
+}
+
+.input-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+input, select {
+    padding: 10px 14px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+input:focus, select:focus {
+    border-color: #a8a8a8;
+}
+
+input[type="text"] {
+    flex: 1;
+    min-width: 180px;
+}
+
+button {
+    background-color: #222222;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #444444;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th, td {
+    border: 1px solid #eaeaea;
+    text-align: center;
+    padding: 0;
+    height: 60px;
+    vertical-align: middle;
+    font-size: 13px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+th {
+    background-color: #f9f9f9;
+    font-weight: 500;
+    color: #666666;
+    height: 40px;
+}
+
+td:first-child {
+    background-color: #f9f9f9;
+    font-weight: 500;
+    color: #666666;
+    width: 60px;
+}
+
+td.filled {
+    background-color: #f4f6f8;
+    color: #222222;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+td.filled:hover {
+    background-color: #ffeaea;
+}
+
+.course-place {
+    display: block;
+    font-size: 11px;
+    color: #888888;
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+/* 토스트 알림창 애니메이션 및 스타일 */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333333;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+}

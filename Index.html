@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간표 생성기</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>시간표 생성기</h1>
+        
+        <div class="input-group">
+            <input type="text" id="courseName" placeholder="강의명 (예: 생활속의 예술)" autocomplete="off">
+            <input type="text" id="coursePlace" placeholder="장소 (예: E0107)" autocomplete="off">
+            <select id="courseDay">
+                <option value="1">월요일</option>
+                <option value="2">화요일</option>
+                <option value="3">수요일</option>
+                <option value="4">목요일</option>
+                <option value="5">금요일</option>
+            </select>
+            <select id="courseTime">
+                <option value="1">1교시</option>
+                <option value="2">2교시</option>
+                <option value="3">3교시</option>
+                <option value="4">4교시</option>
+                <option value="5">5교시</option>
+                <option value="6">6교시</option>
+                <option value="7">7교시</option>
+                <option value="8">8교시</option>
+                <option value="9">9교시</option>
+            </select>
+            <button id="addBtn">추가</button>
+        </div>
+
+        <div id="toastMessage" class="toast">강의명과 장소를 모두 입력해 주세요.</div>
+
+        <div class="table-container">
+            <table id="timetable">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>월</th>
+                        <th>화</th>
+                        <th>수</th>
+                        <th>목</th>
+                        <th>금</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS에서 행 생성 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
